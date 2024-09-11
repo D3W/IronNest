@@ -12,6 +12,29 @@ pub enum DeviceType {
     RingDoorbell,
     RokuTv,
     Stoplight,
+
+    Chromecast,
+    /*
+    AndroidTv,
+    AppleTv,
+    Chromecast,
+    Kodi,
+    LGTv,
+    Plex,
+    SamsungTv,
+    Tivo,
+    VizioTV,
+
+    Spotify,
+    Sonos,
+
+    HueLight,
+
+    Macbook,
+    Minecraft,
+    BrotherPrinter,
+    Roomba,
+    */
 }
 
 impl fmt::Display for DeviceType {
@@ -22,6 +45,26 @@ impl fmt::Display for DeviceType {
             Self::RingDoorbell => write!(f, "Ring Doorbell"),
             Self::RokuTv => write!(f, "Roku TV"),
             Self::Stoplight => write!(f, "Stoplight"),
+
+            Self::Chromecast => write!(f, "Chromecast"),
+            /*
+            Self::AndroidTv => write!(f, "AndroidTv"),
+            Self::AppleTv => write!(f, "AppleTv"),
+            Self::Chromecast => write!(f, "Chromecast"),
+            Self::Kodi => write!(f, "Kodi"),
+            Self::LGTv => write!(f, "LGTv"),
+            Self::Plex => write!(f, "Plex"),
+            Self::SamsungTv => write!(f, "SamsungTv"),
+            Self::Tivo => write!(f, "Tivo"),
+            Self::VizioTV => write!(f, "VizioTV"),
+            Self::Spotify => write!(f, "Spotify"),
+            Self::Sonos => write!(f, "Sonos"),
+            Self::HueLight => write!(f, "HueLight"),
+            Self::Macbook => write!(f, "Macbook"),
+            Self::Minecraft => write!(f, "Minecraft"),
+            Self::BrotherPrinter => write!(f, "BrotherPrinter"),
+            Self::Roomba => write!(f, "Roomba"),
+            */
         }
     }
 }
@@ -33,6 +76,11 @@ pub struct Device {
     pub name: String,
     pub device_type: DeviceType,
     pub ip: String,
+    /*
+    pub port: Option<i16>,
+    pub mac_address: Option<String>,
+    pub service_name: Option<String>,
+    */
     pub power_state: u8,
     pub battery_percentage: i64,
 }

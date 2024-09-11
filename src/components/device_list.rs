@@ -22,7 +22,7 @@ pub fn DeviceList(devices: Resource<(), Result<Vec<Device>, ServerFnError>>) -> 
     view! {
         <div>
             <h2 class="text-lg">"Devices"</h2>
-            <hr class="mb-2"/>
+            <hr class="mb-2" />
             <Suspense fallback=|| {
                 view! { <p>"Loading devices..."</p> }
             }>
@@ -65,7 +65,7 @@ pub fn DeviceList(devices: Resource<(), Result<Vec<Device>, ServerFnError>>) -> 
             {move || {
                 modal
                     .get()
-                    .then(|| view! { <Modal toggle_modal=toggle_modal device=current_device/> })
+                    .then(|| view! { <Modal toggle_modal=toggle_modal device=current_device /> })
             }}
 
         </div>
@@ -84,29 +84,53 @@ pub fn DeviceListItem(device: Device) -> impl IntoView {
     match device.device_type {
         DeviceType::SmartPlug => view! {
             <div>
-                <SmartPlugItem device=device/>
+                <SmartPlugItem device=device />
             </div>
         },
         DeviceType::SmartLight => view! {
             <div>
-                <SmartLightItem device=device/>
+                <SmartLightItem device=device />
             </div>
         },
         DeviceType::RingDoorbell => view! {
             <div>
-                <RingDoorbellItem device=device/>
+                <RingDoorbellItem device=device />
             </div>
         },
         DeviceType::Stoplight => view! {
             <div>
-                <StoplightItem device=device/>
+                <StoplightItem device=device />
             </div>
         },
         DeviceType::RokuTv => view! {
             <div>
-                <RokuTvItem device=device/>
+                <RokuTvItem device=device />
             </div>
         },
+
+        DeviceType::Chromecast => view! {
+            <div>
+                <ChromecastItem device=device />
+            </div>
+        },
+        /*
+        DeviceType::AndroidTv => view!{<div style="display: none;"></div>},
+        DeviceType::AppleTv => view!{<div style="display: none;"></div>},
+        DeviceType::Chromecast => view!{<div style="display: none;"></div>},
+        DeviceType::Kodi => view!{<div style="display: none;"></div>},
+        DeviceType::LGTv => view!{<div style="display: none;"></div>},
+        DeviceType::Plex => view!{<div style="display: none;"></div>},
+        DeviceType::SamsungTv => view!{<div style="display: none;"></div>},
+        DeviceType::Tivo => view!{<div style="display: none;"></div>},
+        DeviceType::VizioTV => view!{<div style="display: none;"></div>},
+        DeviceType::Spotify => view!{<div style="display: none;"></div>},
+        DeviceType::Sonos => view!{<div style="display: none;"></div>},
+        DeviceType::HueLight => view!{<div style="display: none;"></div>},
+        DeviceType::Macbook => view!{<div style="display: none;"></div>},
+        DeviceType::Minecraft => view!{<div style="display: none;"></div>},
+        DeviceType::BrotherPrinter => view!{<div style="display: none;"></div>},
+        DeviceType::Roomba => view!{<div style="display: none;"></div>},
+        */
     }
 }
 
@@ -169,6 +193,25 @@ pub fn SmartLightItem(device: Device) -> impl IntoView {
 
 #[component]
 pub fn RokuTvItem(device: Device) -> impl IntoView {
+    let ip = device.ip.to_string();
+    view! {
+        <DeviceListCard device=device.clone()>
+            <Checkbox
+                value=device.power_state == 1
+                on_click=Box::new(move |value| {
+                    let ip = ip.clone();
+                    spawn_local(async move {
+                        handle_roku_tv_toggle(value, ip).await.unwrap();
+                    });
+                })
+            />
+
+        </DeviceListCard>
+    }
+}
+
+#[component]
+pub fn ChromecastItem(device: Device) -> impl IntoView {
     let ip = device.ip.to_string();
     view! {
         <DeviceListCard device=device.clone()>

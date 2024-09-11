@@ -25,6 +25,7 @@ cfg_if::cfg_if! {
                     roku::{roku_discover, roku_get_device_info},
                     tplink::{discover_devices, types::DeviceData},
                     tuya::{get_devices, get_refresh_token},
+                    chromecast::{client::chromecast_discover},
                 },
             },
             leptos::{get_configuration, logging::log, provide_context, LeptosOptions},
@@ -146,13 +147,14 @@ cfg_if::cfg_if! {
             insert_initial_devices_into_db(shared_pool.clone()).await.unwrap();
 
             let shared_pool_clone1 = shared_pool.clone();
+            let shared_pool_cc = shared_pool.clone();
 
             let http_server = {
                 log::info!("listening on http://{}", &addr);
                 axum::Server::bind(&addr).serve(app.into_make_service())
             };
 
-            if env::var_os("DISABLE_RING").is_some() {
+            if env::var_os("DISABLE_RING").unwrap_or(std::ffi::OsString::new()).is_empty() {
                 let discovery_ring_client = ring_rest_client.clone();
                 let ring_device_discovery_job = tokio::task::spawn(async move {
                     let five_minutes = chrono::Duration::minutes(5).to_std().unwrap();
@@ -204,9 +206,9 @@ cfg_if::cfg_if! {
                 });
             }
 
-            if env::var_os("DISABLE_TP_LINK").is_some() {
+            if env::var_os("DISABLE_TP_LINK").unwrap_or(std::ffi::OsString::new()).is_empty() {
                 tokio::task::spawn({
-                    let shared_pool = shared_pool.clone();
+                    let shared_pool_tplink = shared_pool.clone();
                     async move {
                         loop {
                             match discover_devices().await {
@@ -241,7 +243,7 @@ cfg_if::cfg_if! {
                                             }
                                         }
                                     }
-                                    insert_devices_into_db(shared_pool.clone(), &devices).await.unwrap();
+                                    insert_devices_into_db(shared_pool_tplink.clone(), &devices).await.unwrap();
                                 },
                                 Err(e) => {
                                     eprintln!("Error discovering devices: {}", e);
@@ -253,7 +255,7 @@ cfg_if::cfg_if! {
                 });
             }
 
-            if env::var_os("DISABLE_TUYA").is_some() {
+            if env::var_os("DISABLE_TUYA").unwrap_or(std::ffi::OsString::new()).is_empty() {
                 let shared_pool_3 = shared_pool.clone();
                 tokio::task::spawn(async move {
                     println!("Running thread for tuya auth");
@@ -278,7 +280,7 @@ cfg_if::cfg_if! {
                     }
                     tokio::time::sleep(chrono::Duration::hours(1).to_std().unwrap()).await;
                 });
-            
+
                 let shared_pool_4 = shared_pool.clone();
                 tokio::task::spawn(async move {
                     println!("Running thread for tuya discovery");
@@ -302,7 +304,7 @@ cfg_if::cfg_if! {
                 });
             }
 
-            if env::var_os("DISABLE_EUFY").is_some() {
+            if env::var_os("DISABLE_EUFY").unwrap_or(std::ffi::OsString::new()).is_empty() {
                 let shared_pool_5 = shared_pool.clone();
                 tokio::task::spawn(async move {
                     println!("Running thread for eufy auth");
@@ -332,8 +334,8 @@ cfg_if::cfg_if! {
                     tokio::time::sleep(chrono::Duration::hours(1).to_std().unwrap()).await;
                 });
             }
-            
-            if env::var_os("DISABLE_ROKU").is_some() {
+
+            if env::var_os("DISABLE_ROKU").unwrap_or(std::ffi::OsString::new()).is_empty() {
                 tokio::task::spawn(async move {
                     println!("Running discovery thread for roku devices");
                     loop {
@@ -360,6 +362,33 @@ cfg_if::cfg_if! {
                                 print!("{e}");
                             }
                         };
+                        tokio::time::sleep(Duration::from_secs(30)).await;
+                    }
+                });
+            }
+
+            if true {
+                tokio::task::spawn(async move {
+                    println!("Running discovery thread for cc devices");
+                    loop {
+                        let cc_devices = chromecast_discover().await.unwrap();
+                        let mut devices: Vec<Device> = Vec::new();
+
+                        for device in cc_devices.iter() {
+                            devices.push(Device {
+                                id: 0,
+                                name: (&device.name).to_owned(),
+                                device_type: DeviceType::Chromecast,
+                                ip: (&device.ipv4).to_owned(),
+                                power_state: 1,
+                                battery_percentage: 100,
+                            });
+                        }
+                        match insert_devices_into_db(shared_pool_cc.clone(), &devices).await {
+                            Ok(_) => print!("success"),
+                            Err(err) => error!("{err}"),
+                        }
+
                         tokio::time::sleep(Duration::from_secs(30)).await;
                     }
                 });

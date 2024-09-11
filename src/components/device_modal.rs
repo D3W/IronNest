@@ -14,11 +14,31 @@ use {
 #[component]
 pub fn DeviceView(device: Device) -> impl IntoView {
     match device.device_type {
-        DeviceType::SmartPlug => view! { <SmartPlugView device=device/> },
-        DeviceType::SmartLight => view! { <SmartLightView device=device/> },
-        DeviceType::RingDoorbell => view! { <RingDoorbellView device=device/> },
-        DeviceType::RokuTv => view! { <RokuTvView device=device/> },
-        DeviceType::Stoplight => view! { <StoplightView device=device/> },
+        DeviceType::SmartPlug => view! { <SmartPlugView device=device /> },
+        DeviceType::SmartLight => view! { <SmartLightView device=device /> },
+        DeviceType::RingDoorbell => view! { <RingDoorbellView device=device /> },
+        DeviceType::RokuTv => view! { <RokuTvView device=device /> },
+        DeviceType::Stoplight => view! { <StoplightView device=device /> },
+
+        DeviceType::Chromecast => view! { <ChromecastView device=device /> },
+        /*
+        DeviceType::AndroidTv => view!{<PlaceholderView device=device/>},
+        DeviceType::AppleTv => view!{<PlaceholderView device=device/>},
+        DeviceType::Chromecast => view!{<PlaceholderView device=device/>},
+        DeviceType::Kodi => view!{<PlaceholderView device=device/>},
+        DeviceType::LGTv => view!{<PlaceholderView device=device/>},
+        DeviceType::Plex => view!{<PlaceholderView device=device/>},
+        DeviceType::SamsungTv => view!{<PlaceholderView device=device/>},
+        DeviceType::Tivo => view!{<PlaceholderView device=device/>},
+        DeviceType::VizioTV => view!{<PlaceholderView device=device/>},
+        DeviceType::Spotify => view!{<PlaceholderView device=device/>},
+        DeviceType::Sonos => view!{<PlaceholderView device=device/>},
+        DeviceType::HueLight => view!{<PlaceholderView device=device/>},
+        DeviceType::Macbook => view!{<PlaceholderView device=device/>},
+        DeviceType::Minecraft => view!{<PlaceholderView device=device/>},
+        DeviceType::BrotherPrinter => view!{<PlaceholderView device=device/>},
+        DeviceType::Roomba => view!{<PlaceholderView device=device/>},
+        */
     }
 }
 
@@ -54,7 +74,7 @@ pub fn Modal(toggle_modal: WriteSignal<bool>, device: ReadSignal<Option<Device>>
                                                         {data.name.to_owned()}
                                                     </h3>
                                                     <div class="mt-2">
-                                                        <DeviceView device=data/>
+                                                        <DeviceView device=data />
                                                     </div>
                                                 </div>
                                             }
@@ -95,7 +115,7 @@ pub fn SmartLightView(device: Device) -> impl IntoView {
                 spawn_local(async move {
                     handle_smart_light_brightness(value, ip_clone).await.unwrap();
                 });
-            })/>
+            }) />
         </div>
     }
 }
@@ -140,4 +160,14 @@ pub fn RokuTvView(device: Device) -> impl IntoView {
 #[component]
 pub fn StoplightView(device: Device) -> impl IntoView {
     view! { <div>"Power State: " {device.battery_percentage}</div> }
+}
+
+#[component]
+pub fn ChromecastView(device: Device) -> impl IntoView {
+    view! { <div>"Power State: " {device.battery_percentage}</div> }
+}
+
+#[component]
+pub fn PlaceholderView(device: Device) -> impl IntoView {
+    view! { <div style="display: none;"></div> }
 }
